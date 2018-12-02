@@ -9,37 +9,37 @@ import android.util.Log;
 // version 1.2.3
 //
 
-public class Utils 
+public class Utils
 {
-  private final static String INI_FILE_SD_BUILDPROP = "persist.sys.mvgv70.card";	
-  private final static String EXTERNAL_SD = "/mnt/external_sd/";
+  private final static String INI_FILE_SD_BUILDPROP = "persist.sys.mvgv70.card";
+  private final static String EXTERNAL_SD = "/mnt/sdcard/";
   private final static String XPOSED_MAP_PATH = "/system/etc/mvgv70.xposed.map";
   private final static String CLASS_PARAM = ".class";
   private static IniFile xposedMap = new IniFile();
   private static String TAG = "mvgv70-xposed";
-	
+
   // TAG
   public static void setTag(String newTag)
   {
     TAG = newTag;
   }
-  
-  // системный параметр из build.prop
-  public static String getSystemProperty(String key) 
+
+  //    build.prop
+  public static String getSystemProperty(String key)
   {
     String value = null;
-    try 
+    try
     {
       value = (String)Class.forName("android.os.SystemProperties").getMethod("get", String.class).invoke(null, key);
-    } 
-    catch (Exception e) 
+    }
+    catch (Exception e)
     {
       Log.e(TAG,e.getMessage());
     }
     return value;
   }
-  
-  // sd-карта для чтения файла настроек
+
+  // sd-
   public static String getModuleSdCard()
   {
     String value = getSystemProperty(INI_FILE_SD_BUILDPROP);
@@ -53,23 +53,23 @@ public class Utils
       return value;
     }
   }
-  
-  // чтение карты полей и функций xposed
+
+  //      xposed
   public static void readXposedMap()
   {
     xposedMap.clear();
-    try 
+    try
     {
       Log.d(TAG,"read xposed map from "+XPOSED_MAP_PATH);
       xposedMap.loadFromFile(XPOSED_MAP_PATH);
-    } 
-    catch (Exception e) 
+    }
+    catch (Exception e)
     {
       Log.w(TAG,e.getMessage());
     }
   }
-  
-  // отладочный вывод карты полей и функций
+
+  //
   public static void LogXposedMap()
   {
     Log.d(TAG,"");
@@ -77,27 +77,27 @@ public class Utils
     xposedMap.LogProps(TAG);
     Log.d(TAG,"");
   }
-  
-  // получение обфусцированного имени класса
+
+  //
   public static String getXposedMapClass(String TAG, String className)
   {
     String value = xposedMap.getValue(className,CLASS_PARAM,className);
     return value;
   }
-  
-  // получение обфусцированного имени функции или поля
+
+  //
   public static String getXposedMapValue(String TAG, String section, String key)
   {
-    // если нет строки вернет null
+    //     null
     String value = xposedMap.getValue(section, key, null);
     if (value == null)
       return key;
     else
       return value;
   }
-  
-  // перехват вызова метода
-  public static XC_MethodHook.Unhook findAndHookMethod(String className, ClassLoader classLoader, String methodName, Object... parameterTypesAndCallback) 
+
+  //
+  public static XC_MethodHook.Unhook findAndHookMethod(String className, ClassLoader classLoader, String methodName, Object... parameterTypesAndCallback)
   {
     String nameOfMethod = getXposedMapValue(TAG, className, methodName);
     if (!nameOfMethod.isEmpty())
@@ -112,17 +112,17 @@ public class Utils
       return null;
     }
   }
-  
-  // перехват вызова конструктора
+
+  //
   public static XC_MethodHook.Unhook findAndHokConstructor(String className, ClassLoader classLoader, Object... parameterTypesAndCallback)
   {
     String nameOfClass = getXposedMapClass(TAG, className);
     Log.d(TAG,"findAndHok "+nameOfClass+" constructor");
     return XposedHelpers.findAndHookConstructor(nameOfClass, classLoader, parameterTypesAndCallback);
   }
-  
-  // вызов метода
-  public static Object callMethod(Object obj, String methodName, Object... args) 
+
+  //
+  public static Object callMethod(Object obj, String methodName, Object... args)
   {
     String className = obj.getClass().getName();
     String nameOfMethod = getXposedMapValue(TAG, className, methodName);
@@ -137,8 +137,8 @@ public class Utils
       return null;
     }
   }
-  
-  // получение объектного поля
+
+  //
   public static Object getObjectField(Object obj, String fieldName)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -153,8 +153,8 @@ public class Utils
       return null;
     }
   }
-  
-  // установка объектного поля
+
+  //
   public static void setObjectField(Object obj, String fieldName, Object value)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -168,8 +168,8 @@ public class Utils
       Log.e(TAG,obj.getClass().getName()+":"+nameOfFiled+" -> "+e.getMessage());
     }
   }
-  
-  // получение целочисленного поля
+
+  //
   public static int getIntField(Object obj, String fieldName)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -184,8 +184,8 @@ public class Utils
       return 0;
     }
   }
-  
-  // установка целочисленного поля
+
+  //
   public static void setIntField(Object obj, String fieldName, int value)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -199,8 +199,8 @@ public class Utils
       Log.e(TAG,obj.getClass().getName()+":"+nameOfFiled+" -> "+e.getMessage());
     }
   }
-  
-  //получение boolean поля
+
+  // boolean
   public static Boolean getBooleanField(Object obj, String fieldName)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -215,8 +215,8 @@ public class Utils
       return false;
     }
   }
-  
-  // получение поля типа boolean
+
+  //    boolean
   public static void setBooleanField(Object obj, String fieldName, boolean value)
   {
     String nameOfFiled = getXposedMapValue(TAG, obj.getClass().getName(), fieldName);
@@ -230,5 +230,5 @@ public class Utils
       Log.e(TAG,obj.getClass().getName()+":"+nameOfFiled+" -> "+e.getMessage());
     }
   }
-  
+
 }
